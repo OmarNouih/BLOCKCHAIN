@@ -9,7 +9,7 @@ The **Mini Twitter DApp** is a decentralized application that allows users to po
 
 ![Mini Twitter DApp Interface](MINI%20TWITTER%20D'APP/image1.png)
 
-![Mini Twitter DApp LIKES](MINI TWITTER D'APP/image2.png)
+![Mini Twitter DApp LIKES](MINI%20TWITTER%20D'APP/image2.png)
 
 ### Features
 - **Post Messages**: Users can publish short messages (up to 140 characters).
