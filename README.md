@@ -8,7 +8,8 @@ This repository contains two blockchain-based projects developed as part of a Ma
 The **Mini Twitter DApp** is a decentralized application that allows users to post, edit, like, dislike, and comment on messages in a blockchain environment. The application uses Solidity for the backend smart contract and Web3.js for interaction with the Ethereum blockchain.
 
 ![Mini Twitter DApp Interface](MINI TWITTER D'APP/image1.png)
-![Mini Twitter DApp Interface](MINI TWITTER D'APP/image2.png)
+
+![Mini Twitter DApp LIKES](MINI TWITTER D'APP/image2.png)
 
 ### Features
 - **Post Messages**: Users can publish short messages (up to 140 characters).
