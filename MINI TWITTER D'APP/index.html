@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Mini Twitter DApp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v3.0.6/css/line.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Open Sans', sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            flex: 1;
+            background: linear-gradient(135deg, #1da1f2, #1a8cd8);
+            color: #fff;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            border-top-left-radius: 15px;
+            border-bottom-left-radius: 15px;
+        }
+        .sidebar h1 {
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar h1 i {
+            font-size: 28px;
+        }
+        .sidebar p {
+            font-size: 14px;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+        .sidebar button {
+            margin-top: 20px;
+            padding: 12px 20px;
+            background: #fff;
+            color: #1da1f2;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar button:hover {
+            background: #e8f4fc;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 2;
+            padding: 30px;
+            background: linear-gradient(135deg, #fdfdfd, #f5f7fa);
+            border-top-right-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+        .tweet-box, .feed {
+            margin-bottom: 20px;
+            border-radius: 10px;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        .tweet-box textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e6e6e6;
+            resize: none;
+            font-size: 16px;
+        }
+        .tweet-box button {
+            background: #1da1f2;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s;
+            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        .tweet-box button:hover {
+            background: #0d8bd9;
+        }
+        .tweet-box .counter {
+            float: right;
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Feed */
+        .feed .post {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0px 5px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feed .post:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        .feed .post p {
+            margin: 5px 0;
+            color: #333;
+        }
+        .feed .post .action-buttons {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .feed .post .action-buttons button {
+            background: #1da1f2;
+            color: #fff;
+            padding: 5px 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.3s;
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+        }
+        .feed .post .action-buttons button:hover {
+            background: #0d8bd9;
+        }
+        .feed .post strong {
+            color: #1da1f2;
+        }
+
+        /* Modal for editing */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            width: 400px;
+            z-index: 1000;
+        }
+        .modal.active {
+            display: block;
+        }
+        .modal textarea {
+            width: 100%;
+            height: 80px;
+            resize: none;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+        .modal button {
+            width: 100%;
+            padding: 10px;
+            background: #1da1f2;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        .modal button:hover {
+            background: #0d8bd9;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        .overlay.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h1><i class="fas fa-bird"></i> Mini Twitter DApp</h1>
+            <p>Connect your wallet to share your thoughts and engage with the community!</p>
+            <button id="connectWalletBtn" onclick="connectWallet()">
+                <i class="fas fa-wallet"></i> Connect Wallet
+            </button>
+            <p id="userAddress"></p>
+            <p style="margin-top: 20px; font-size: 12px;">Usage: 
+                <br>1. Click "Connect Wallet". 
+                <br>2. Post your thoughts. 
+                <br>3. Engage with others by liking or disliking their posts.
+            </p>
+            <div style="margin-top: auto; display: flex; gap: 10px;">
+                <a href="#" style="color: #fff;"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="tweet-box">
+                <h2>Add a New Post</h2>
+                <textarea id="postMessage" placeholder="What's on your mind?" maxlength="140"></textarea>
+                <div class="counter" id="charCounter">140</div>
+                <button onclick="addPost()">Post</button>
+            </div>
+            <div id="feed" class="feed"></div>
+        </div>
+    </div>
+
+    <!-- Modal for editing a post -->
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+    <div class="modal" id="editModal">
+        <textarea id="editMessage"></textarea>
+        <button onclick="saveEdit()">Save Changes</button>
+    </div>
+
+    <script>
+        let web3, contract;
+        const contractAddress = '';  // Replace with your deployed contract address
+        const abi = [ 
+            // Sample ABI structure, replace with your actual contract ABI
+            {
+                "inputs": [{"internalType": "string","name": "_message","type": "string"}],
+                "name": "publishPost",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "uint256","name": "_postId","type": "uint256"}],
+                "name": "getPost",
+                "outputs": [
+                    {"internalType": "string","name": "message","type": "string"},
+                    {"internalType": "address","name": "author","type": "address"},
+                    {"internalType": "uint256","name": "numLikes","type": "uint256"},
+                    {"internalType": "uint256","name": "numDislikes","type": "uint256"},
+                    {"internalType": "uint256","name": "timestamp","type": "uint256"},
+                    {"internalType": "uint256","name": "lastModified","type": "uint256"}
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "getTotalPosts",
+                "outputs": [{"internalType": "uint256","name": "","type": "uint256"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "uint256","name": "_postId","type": "uint256"}],
+                "name": "likePost",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "uint256","name": "_postId","type": "uint256"}],
+                "name": "dislikePost",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "uint256","name": "_postId","type": "uint256"},{"internalType": "string","name": "_newMessage","type": "string"}],
+                "name": "editPost",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            }
+        ];
+
+        async function connectWallet() {
+            try {
+                if (window.ethereum) {
+                    web3 = new Web3(window.ethereum);
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    const account = (await web3.eth.getAccounts())[0];
+                    document.getElementById('userAddress').innerText = `Connected: ${account}`;
+                    contract = new web3.eth.Contract(abi, contractAddress);
+                    loadPosts(account);  // Load posts once connected
+                } else {
+                    alert('Please install MetaMask to use this app.');
+                }
+            } catch (error) {
+                console.error("Error connecting wallet:", error);
+                alert("Failed to connect wallet. Please check MetaMask permissions.");
+            }
+        }
+
+        async function loadPosts(currentUser) {
+            try {
+                const feedDiv = document.getElementById('feed');
+                feedDiv.innerHTML = '';
+                const postCount = await contract.methods.getTotalPosts().call();
+                console.log("Total posts:", postCount);
+
+                for (let i = 0; i < postCount; i++) {
+                    const post = await contract.methods.getPost(i).call();
+                    const postDate = new Date(Number(post.timestamp) * 1000).toLocaleString();
+                    const postDiv = document.createElement('div');
+                    postDiv.className = 'post';
+                    postDiv.innerHTML = `
+                        <p><strong>Author:</strong> ${post.author}</p>
+                        <p><strong>Message:</strong> ${post.message}</p>
+                        <p><strong>Posted On:</strong> ${postDate}</p>
+                        <div class="action-buttons">
+                            <button onclick="likePost(${i})"><i class="far fa-thumbs-up"></i> Like ${Number(post.numLikes)}</button>
+                            <button onclick="dislikePost(${i})"><i class="far fa-thumbs-down"></i> Dislike ${Number(post.numDislikes)}</button>
+                            ${currentUser.toLowerCase() === post.author.toLowerCase() ? `<button onclick="openEditModal(${i}, '${post.message}')"><i class="far fa-edit"></i> Edit</button>` : ''}
+                        </div>
+                    `;
+                    feedDiv.appendChild(postDiv);
+                }
+            } catch (error) {
+                console.error("Error loading posts:", error);
+                alert("Failed to load posts. Please check your contract and try again.");
+            }
+        }
+
+        async function addPost() {
+            try {
+                const message = document.getElementById('postMessage').value;
+                if (!message) {
+                    alert("Message cannot be empty.");
+                    return;
+                }
+                const account = (await web3.eth.getAccounts())[0];
+                await contract.methods.publishPost(message).send({ from: account });
+                document.getElementById('postMessage').value = '';
+                loadPosts(account);  // Reload the feed after adding a post
+            } catch (error) {
+                console.error("Error adding post:", error);
+                alert("Failed to add post. Please check MetaMask and try again.");
+            }
+        }
+
+        async function likePost(postId) {
+            try {
+                const account = (await web3.eth.getAccounts())[0];
+                await contract.methods.likePost(postId).send({ from: account });
+                loadPosts(account);  // Reload the feed after liking a post
+            } catch (error) {
+                console.error("Error liking post:", error);
+                alert("Failed to like post. Please check MetaMask permissions.");
+            }
+        }
+
+        async function dislikePost(postId) {
+            try {
+                const account = (await web3.eth.getAccounts())[0];
+                await contract.methods.dislikePost(postId).send({ from: account });
+                loadPosts(account);  // Reload the feed after disliking a post
+            } catch (error) {
+                console.error("Error disliking post:", error);
+                alert("Failed to dislike post. Please check MetaMask permissions.");
+            }
+        }
+
+        function openEditModal(postId, message) {
+            editPostId = postId;
+            document.getElementById('editMessage').value = message;
+            document.getElementById('overlay').classList.add('active');
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('overlay').classList.remove('active');
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        async function saveEdit() {
+            try {
+                const newMessage = document.getElementById('editMessage').value;
+                const account = (await web3.eth.getAccounts())[0];
+                await contract.methods.editPost(editPostId, newMessage).send({ from: account });
+                closeModal();
+                loadPosts(account);  // Reload the feed after editing a post
+            } catch (error) {
+                console.error("Error editing post:", error);
+                alert("Failed to edit post. Please check MetaMask permissions.");
+            }
+        }
+
+        const postMessage = document.getElementById('postMessage');
+        const charCounter = document.getElementById('charCounter');
+        postMessage.addEventListener('input', () => {
+            const maxLength = 140;
+            charCounter.innerText = maxLength - postMessage.value.length;
+        });
+    </script>
+</body>
+</html>
