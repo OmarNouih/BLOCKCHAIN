@@ -15,7 +15,6 @@ The **Mini Twitter DApp** is a decentralized application that allows users to po
 - **Post Messages**: Users can publish short messages (up to 140 characters).
 - **Edit Posts**: Only the original author can edit their post.
 - **Like/Dislike System**: Each post can receive likes or dislikes.
-- **Commenting**: Users can add comments to posts.
 - **Author Identification**: Displays the author’s Ethereum address for each post and comment.
 
 ### Technologies Used
@@ -27,7 +26,6 @@ The **Mini Twitter DApp** is a decentralized application that allows users to po
 1. **publishPost**: Adds a new post to the DApp.
 2. **editPost**: Allows the author to edit their post.
 3. **addLike/addDislike**: Adds a like or dislike to a post.
-4. **addComment**: Adds a comment to a post.
 
 ### Deployment
 The DApp is designed to run on a local Ethereum test network using MetaMask and Ganache for development and testing.
